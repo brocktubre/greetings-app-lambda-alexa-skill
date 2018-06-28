@@ -17,6 +17,8 @@ const STOP_MESSAGE = 'Goodbye!';
 
 const JOKE_URL = 'https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/random_joke';
 const RANDOM_FACT_URL = 'http://randomuselessfact.appspot.com/random.json?language=en';
+const NEWS_URL = 'https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=1fa69fea9d63463db05398936730c553';
+
 
 const GetNewGreetingHandler = {
   canHandle(handlerInput) {
@@ -122,9 +124,21 @@ const TodaysNewsHandler = {
   },
   handle(handlerInput, error) {
 
-    return handlerInput.responseBuilder
-      .speak('Here is todays news.')
-      .getResponse();
+    const url = NEWS_URL;
+    const newsApiRequest = request(url, { json: true });
+
+    return newsApiRequest.then((body) => {
+      const randomArticle = Math.floor(Math.random() * body.totalResults) + 1;
+      const article = body.articles[randomArticle];
+      const speech = new Speech();
+      speech.say('Here is the top story from ' + article.source.name + '.');
+      speech.say(article.description);
+      const speechOutput = speech.ssml(true);  
+      return handlerInput.responseBuilder
+          .speak(speechOutput)
+          .withStandardCard(article.title, article.description, article.urlToImage, article.urlToImage)
+          .getResponse();
+    }); 
   },
 };
 
