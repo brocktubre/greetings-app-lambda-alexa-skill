@@ -17,6 +17,7 @@
     "ask-sdk": "^2.0.0",
     "lambda-local": "^1.5.1",
     "request": "^2.87.0",
-    "request-promise": "^4.2.2"
+    "request-promise": "^4.2.2",
+    "ssml-builder": "^0.4.3"
   }
 }

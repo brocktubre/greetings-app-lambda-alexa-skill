@@ -5,6 +5,7 @@ const Alexa = require('ask-sdk');
 const AWS = require('aws-sdk');
 const request = require('request-promise');
 const https = require('https');
+const Speech = require('ssml-builder');
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 
@@ -149,9 +150,13 @@ const TellAJokeHandler = {
     const jokeRequest = request(url, { json: true });
 
     return jokeRequest.then((body) => {
-      const joke = body.setup + " " + body.punchline;
+      const speech = new Speech();
+      speech.say(body.setup);
+      speech.pause('200ms');
+      speech.say(body.punchline);    
+      const speechOutput = speech.ssml(true);  
       return handlerInput.responseBuilder
-          .speak(joke)
+          .speak(speechOutput)
           .getResponse();
     }); 
   },
