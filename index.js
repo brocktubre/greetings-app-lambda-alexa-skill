@@ -15,6 +15,9 @@ const HELP_MESSAGE = 'You can say greet me, or, you can say exit... What can I h
 const HELP_REPROMPT = 'What can I help you with?';
 const STOP_MESSAGE = 'Goodbye!';
 
+const JOKE_URL = 'https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/random_joke';
+const RANDOM_FACT_URL = 'http://randomuselessfact.appspot.com/random.json?language=en';
+
 const GetNewGreetingHandler = {
   canHandle(handlerInput) {
     const request = handlerInput.requestEnvelope.request;
@@ -132,9 +135,14 @@ const RandomFactHandler = {
   },
   handle(handlerInput, error) {
 
-    return handlerInput.responseBuilder
-      .speak('Here is a random fact.')
-      .getResponse();
+    const url = RANDOM_FACT_URL;
+    const randomFactRequest = request(url, { json: true });
+
+    return randomFactRequest.then((body) => {
+      return handlerInput.responseBuilder
+          .speak(body.text)
+          .getResponse();
+    }); 
   },
 };
 
@@ -146,14 +154,12 @@ const TellAJokeHandler = {
   },
   handle(handlerInput, error) {
     // Hit the joke API and build out the response
-    const url = 'https://08ad1pao69.execute-api.us-east-1.amazonaws.com/dev/random_joke';
+    const url = JOKE_URL;
     const jokeRequest = request(url, { json: true });
 
     return jokeRequest.then((body) => {
       const speech = new Speech();
-      speech.say(body.setup);
-      speech.pause('200ms');
-      speech.say(body.punchline);    
+      speech.say(body.setup).pause('200ms').say(body.punchline);  
       const speechOutput = speech.ssml(true);  
       return handlerInput.responseBuilder
           .speak(speechOutput)
